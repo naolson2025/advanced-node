@@ -14,6 +14,20 @@ module.exports = app => {
   });
 
   app.get('/api/blogs', requireLogin, async (req, res) => {
+    // connect to redis
+    const redis = require('redis');
+    const redisUrl = 'redis://127.0.0.1:6379';
+    const client = redis.createClient(redisUrl);
+    // since redis doesn't support promises, we need to promisify it
+    // the util library comes with node
+    const util = require('util');
+    client.get = util.promisify(client.get);
+    // Do we have any cached data in redis related to this query
+    const cachedBlogs = await client.get(req.user.id);
+    // If yes, then respond to the request right away and return
+
+    // If no, we need to respond to request and update our cache to store the data
+
     const blogs = await Blog.find({ _user: req.user.id });
 
     res.send(blogs);
