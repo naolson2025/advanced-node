@@ -18,7 +18,7 @@ beforeEach(async () => {
 // here we use it to spin up a headless browser and test our React app
 test('header renders correctly', async () => {
   // here we select the html element with the class 'brand-logo'
-  const text = await page.$eval('a.brand-logo', (el) => el.innerHTML);
+  const text = await page.getContentsOf('a.brand-logo');
   expect(text).toEqual('Blogster');
 });
 

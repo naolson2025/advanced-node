@@ -20,11 +20,11 @@ class CustomPage {
 
     return new Proxy(customPage, {
       // target is a reference to customPage, provided above
-      get: function(target, property) {
+      get: function (target, property) {
         // the property is whatever is appended to the proxy
         // ex: customPage.helloThere() -> property = helloThere
         return customPage[property] || browser[property] || page[property];
-      }
+      },
     });
   }
 
@@ -37,15 +37,19 @@ class CustomPage {
     const user = await userFactory();
     // create a fake session object for the user
     const { session, sig } = sessionFactory(user);
-    
+
     // set the cookies in the browser with puppeteer
     await this.page.setCookie({ name: 'session', value: session });
     await this.page.setCookie({ name: 'session.sig', value: sig });
     // refresh the page, to simulate logging in
-    await this.page.goto('http://localhost:3000');
+    await this.page.goto('http://localhost:3000/blogs');
 
     // check that the logout button is visible
     await this.page.waitFor('a[href="/auth/logout"]');
+  }
+
+  async getContentsOf(selector) {
+    return this.page.$eval(selector, (el) => el.innerHTML);
   }
 }
 
