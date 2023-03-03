@@ -1,0 +1,28 @@
+# tell travis what language we are using
+language: node_js
+# node version to use
+node_js:
+  - '8'
+# operating system to use
+# trusty is a version of linux
+dist: trusty
+# tell travis what services we need
+# services could be a database or a web server
+services:
+  - mongodb
+  - redis-server
+# set environment variables
+env:
+  - NODE_ENV=ci
+# tell travis to cache node modules so it doesn't have to install them every time
+# this speeds up our build a bit
+cache:
+  directories:
+    - node_modules
+    # also cache the node modules in the client folder
+    - client/node_modules
+install:
+  # install the dependencies in the root folder
+  - npm install
+  # install the dependencies in the client folder
+  - npm run client-install
