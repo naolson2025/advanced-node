@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 const redis = require('redis');
 const util = require('util');
-// const keys = require('../config/keys');
+const keys = require('../config/keys');
 
 // set up redis connection & promisify the get function
 // so that we can use it with async/await
-const redisUrl = 'redis://127.0.0.1:6379';
-const client = redis.createClient(redisUrl);
+// const redisUrl = 'redis://127.0.0.1:6379';
+const client = redis.createClient(keys.redisUrl);
 client.hget = util.promisify(client.hget);
 
 // save an instance of the originial mongoose exec function
@@ -19,14 +19,14 @@ const exec = mongoose.Query.prototype.exec;
 // ex: Blog.find({ _user: req.user.id }).cache({ key: req.user.id });
 // we will nest the cached data under the user id, which will be provided
 // by in the options object
-mongoose.Query.prototype.cache = function(options = {}) {
+mongoose.Query.prototype.cache = function (options = {}) {
   this.useCache = true;
   this.hashKey = JSON.stringify(options.key || '');
   return this;
-}
+};
 
 // override the exec function with our caching logic
-mongoose.Query.prototype.exec = async function() {
+mongoose.Query.prototype.exec = async function () {
   // if we don't want to use caching then just return the original exec function
   if (!this.useCache) {
     return exec.apply(this, arguments);
@@ -39,7 +39,7 @@ mongoose.Query.prototype.exec = async function() {
     // the empty object is the target object that properties will be copied to
     // the 2nd & 3rd arguments are the source objects that properties will be copied from
     Object.assign({}, this.getQuery(), {
-      collection: this.mongooseCollection.name
+      collection: this.mongooseCollection.name,
     })
   );
 
@@ -55,7 +55,7 @@ mongoose.Query.prototype.exec = async function() {
     // if the cached value is an array then we need to map over it
     // and create a new instance of a mongo model for each object in the array
     return Array.isArray(doc)
-      ? doc.map(d => new this.model(d))
+      ? doc.map((d) => new this.model(d))
       : new this.model(doc);
   }
 
@@ -67,11 +67,11 @@ mongoose.Query.prototype.exec = async function() {
   client.hset(this.hashKey, key, JSON.stringify(result), 'EX', 10);
   console.log('Serving from MongoDB');
   return result;
-}
+};
 
 // clear the cached data for a key
 module.exports = {
   clearHash(hashKey) {
     client.del(JSON.stringify(hashKey));
-  }
+  },
 };

@@ -13,7 +13,7 @@ services:
   - redis-server
 # set environment variables
 env:
-  - NODE_ENV=ci
+  - NODE_ENV=ci PORT=3000
 # tell travis to cache node modules so it doesn't have to install them every time
 # this speeds up our build a bit
 cache:
@@ -24,5 +24,16 @@ cache:
 install:
   # install the dependencies in the root folder
   - npm install
-  # install the dependencies in the client folder
-  - npm run client-install
+  # build all the react code into a single JS file that will be served
+  #  to the front end by the express api
+  - npm run build
+script:
+  # nohup = no hang up
+  # nohup: if the shell is closed, don't kill the process
+  # npm run start: will run the server
+  # &: run the process in the background
+  - nohup npm run start &
+  # wait 3 seconds for the server to start
+  - sleep 3
+  # run the tests
+  - npm run test
