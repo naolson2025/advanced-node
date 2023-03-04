@@ -34,6 +34,7 @@ class CustomPage {
   }
 
   async login() {
+    console.log('Logging in...');
     // create a fake user object
     const user = await userFactory();
     // create a fake session object for the user
