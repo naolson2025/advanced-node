@@ -13,7 +13,19 @@ export const handleToken = token => async dispatch => {
   dispatch({ type: FETCH_USER, payload: res.data });
 };
 
-export const submitBlog = (values, history) => async dispatch => {
+export const submitBlog = (values, file, history) => async dispatch => {
+  // retrieve the s3 presigned url from the server
+  const uploadConfig = await axios.get('/api/upload');
+
+  // upload the file to s3
+  await axios.put(uploadConfig.data.url, file, {
+    headers: {
+      // specify the file type, should be image/jpeg or will get an error
+      // because we are only allowing jpeg files in the s3 bucket
+      'Content-Type': file.type,
+    },
+  });
+
   const res = await axios.post('/api/blogs', values);
 
   history.push('/blogs');

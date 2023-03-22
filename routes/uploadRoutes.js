@@ -6,6 +6,7 @@ const requireLogin = require('../middlewares/requireLogin');
 const s3 = new AWS.S3({
   accessKeyId: keys.accessKeyId,
   secretAccessKey: keys.secretAccessKey,
+  region: 'us-east-2',
 });
 
 // logic for getting the presigned url from s3
